@@ -1,3 +1,4 @@
+#![feature(int_roundings)]
 use recursion::*;
 
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
@@ -13,7 +14,7 @@ enum Expr {
 fn pow(a: Expr, b: Expr) -> Expr {
     Expr::Pow(Box::new(a), Box::new(b))
 }
-fn int(n: Num) -> Expr {
+fn literal(n: Num) -> Expr {
     Expr::Literal(n)
 }
 
@@ -45,6 +46,15 @@ fn eval(e: &Expr) -> Num {
     e.collapse_frames(|frame: ExprFrame<Num>| match frame {
         ExprFrame::Pow(a, b) => match (a, b) {
             (Int(x), Int(y)) => Int(x.pow(y)),
+            (Root(base, root), Int(pow)) => {
+                // 2^(1/2) ^ 4 --> root=2, pow=4
+                if pow % root == 0 {
+                    let int_pow = pow.div_floor(root);
+                    Int(base.pow(int_pow))
+                } else {
+                    todo!();
+                }
+            }
             _ => Int(1),
         },
         ExprFrame::Literal(x) => x,
@@ -53,6 +63,8 @@ fn eval(e: &Expr) -> Num {
 
 fn main() {
     use Num::*;
-    let expr = pow(int(Int(2)), int(Int(2)));
+    let expr = pow(literal(Int(2)), literal(Int(2)));
     assert_eq!(eval(&expr), Int(4));
+    let expr = pow(literal(Root(2, 2)), literal(Int(2)));
+    assert_eq!(eval(&expr), Int(2));
 }
