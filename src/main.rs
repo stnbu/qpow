@@ -44,7 +44,8 @@ fn eval(e: &Expr) -> Num {
     use Num::*;
     e.collapse_frames(|frame: ExprFrame<Num>| match frame {
         ExprFrame::Pow(a, b) => match (a, b) {
-            (_, _) => Int(1),
+            (Int(x), Int(y)) => Int(x.pow(y)),
+            _ => Int(1),
         },
         ExprFrame::Literal(x) => x,
     })
@@ -53,5 +54,5 @@ fn eval(e: &Expr) -> Num {
 fn main() {
     use Num::*;
     let expr = pow(int(Int(2)), int(Int(2)));
-    assert_eq!(eval(&expr), Int(1));
+    assert_eq!(eval(&expr), Int(4));
 }
