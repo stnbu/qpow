@@ -1,10 +1,11 @@
 #![feature(int_roundings)]
+use num_rational::Ratio;
 use recursion::*;
 
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
 enum Num {
-    Int(u32),
-    Root(u32, u32),
+    Rational(Ratio<u32>),
+    Root(Ratio<u32>, u32),
 }
 
 enum Expr {
@@ -45,17 +46,17 @@ fn eval(e: &Expr) -> Num {
     use Num::*;
     e.collapse_frames(|frame: ExprFrame<Num>| match frame {
         ExprFrame::Pow(a, b) => match (a, b) {
-            (Int(x), Int(y)) => Int(x.pow(y)),
-            (Root(base, root), Int(pow)) => {
+            (Rational(x), Rational(y)) => Rational(x.pow(*y.numer() as i32)), // TODO
+            (Root(base, root), Rational(pow)) => {
                 // 2^(1/2) ^ 4 --> root=2, pow=4
-                if pow % root == 0 {
-                    let int_pow = pow.div_floor(root);
-                    Int(base.pow(int_pow))
+                if pow.numer() % root == 0 {
+                    let int_pow = pow.numer().div_floor(root) as i32;
+                    Rational(base.pow(int_pow))
                 } else {
                     todo!();
                 }
             }
-            _ => Int(1),
+            _ => Rational(Ratio::new(1, 1)),
         },
         ExprFrame::Literal(x) => x,
     })
@@ -63,8 +64,10 @@ fn eval(e: &Expr) -> Num {
 
 fn main() {
     use Num::*;
-    let expr = pow(literal(Int(2)), literal(Int(2)));
-    assert_eq!(eval(&expr), Int(4));
-    let expr = pow(literal(Root(2, 2)), literal(Int(2)));
-    assert_eq!(eval(&expr), Int(2));
+    let two = Ratio::new(2, 1);
+    let four = Ratio::new(4, 1);
+    let expr = pow(literal(Rational(two)), literal(Rational(two)));
+    assert_eq!(eval(&expr), Rational(four));
+    let expr = pow(literal(Root(two, 2)), literal(Rational(two)));
+    assert_eq!(eval(&expr), Rational(two));
 }
