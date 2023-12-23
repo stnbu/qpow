@@ -1,5 +1,7 @@
 #![feature(int_roundings)]
+use itertools::Itertools;
 use num_rational::Ratio;
+use prime_factorization::Factorization;
 use recursion::*;
 
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
@@ -42,6 +44,27 @@ impl<'a> Collapsible for &'a Expr {
         }
     }
 }
+
+pub fn root(base: u32, root: u32) -> Vec<Num> {
+    use Num::*;
+    let factorization = Factorization::run(base).factors;
+    let mut result = vec![];
+    for factor in factorization.iter().sorted().unique() {
+        let count = factorization.iter().filter(|&n| n == factor).count() as u32;
+        let remainder = count % root;
+        let quotient = count.div_floor(root);
+        if quotient != 0 {
+            let n = Rational(Ratio::new(quotient * factor, 1));
+            result.push(n);
+        }
+        if remainder != 0 {
+            let n = Root(Ratio::new(remainder * factor, 1), root);
+            result.push(n);
+        }
+    }
+    result
+}
+
 fn eval(e: &Expr) -> Num {
     use Num::*;
     e.collapse_frames(|frame: ExprFrame<Num>| match frame {
@@ -63,11 +86,16 @@ fn eval(e: &Expr) -> Num {
 }
 
 fn main() {
-    use Num::*;
-    let two = Ratio::new(2, 1);
-    let four = Ratio::new(4, 1);
-    let expr = pow(literal(Rational(two)), literal(Rational(two)));
-    assert_eq!(eval(&expr), Rational(four));
-    let expr = pow(literal(Root(two, 2)), literal(Rational(two)));
-    assert_eq!(eval(&expr), Rational(two));
+    for (n, m) in &[(2 * 2 * 2, 2)] {
+        let r = root(*n, *m);
+        dbg!(r);
+    }
+    /*     use Num::*;
+       let two = Ratio::new(2, 1);
+       let four = Ratio::new(4, 1);
+       let expr = pow(literal(Rational(two)), literal(Rational(two)));
+       assert_eq!(eval(&expr), Rational(four));
+       let expr = pow(literal(Root(two, 2)), literal(Rational(two)));
+       assert_eq!(eval(&expr), Rational(two));
+    */
 }
