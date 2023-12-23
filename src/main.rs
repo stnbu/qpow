@@ -86,7 +86,7 @@ fn eval(e: &Expr) -> Num {
 }
 
 fn main() {
-    for (n, m) in &[(2 * 2 * 2, 2)] {
+    for (n, m) in &[(2, 6)] {
         let r = root(*n, *m);
         dbg!(r);
     }
