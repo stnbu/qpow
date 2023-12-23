@@ -1,17 +1,17 @@
 enum Expr {
     Pow(Box<Expr>, Box<Expr>),
-    LiteralInt(u32),
+    Int(u32),
 }
 fn pow(a: Expr, b: Expr) -> Expr {
     Expr::Pow(Box::new(a), Box::new(b))
 }
-fn literal(n: u32) -> Expr {
-    Expr::LiteralInt(n)
+fn int(n: u32) -> Expr {
+    Expr::Int(n)
 }
 
 pub enum ExprFrame<A> {
     Pow(A, A),
-    LiteralInt(u32),
+    Int(u32),
 }
 use recursion::*;
 impl MappableFrame for ExprFrame<PartiallyApplied> {
@@ -19,7 +19,7 @@ impl MappableFrame for ExprFrame<PartiallyApplied> {
     fn map_frame<A, B>(input: Self::Frame<A>, mut f: impl FnMut(A) -> B) -> Self::Frame<B> {
         match input {
             ExprFrame::Pow(a, b) => ExprFrame::Pow(f(a), f(b)),
-            ExprFrame::LiteralInt(x) => ExprFrame::LiteralInt(x),
+            ExprFrame::Int(x) => ExprFrame::Int(x),
         }
     }
 }
@@ -28,19 +28,19 @@ impl<'a> Collapsible for &'a Expr {
     fn into_frame(self) -> <Self::FrameToken as MappableFrame>::Frame<Self> {
         match self {
             Expr::Pow(a, b) => ExprFrame::Pow(a, b),
-            Expr::LiteralInt(x) => ExprFrame::LiteralInt(*x),
+            Expr::Int(x) => ExprFrame::Int(*x),
         }
     }
 }
 fn eval(e: &Expr) -> u32 {
     e.collapse_frames(|frame: ExprFrame<u32>| match frame {
         ExprFrame::Pow(a, b) => a.pow(b),
-        ExprFrame::LiteralInt(x) => x,
+        ExprFrame::Int(x) => x,
     })
 }
 
 fn main() {
-    let expr = pow(literal(2), literal(2));
+    let expr = pow(int(2), int(2));
     assert_eq!(eval(&expr), 4);
 }
 /*
