@@ -1,19 +1,25 @@
 use recursion::*;
 
+#[derive(Eq, PartialEq, Debug, Copy, Clone)]
+enum Num {
+    Int(u32),
+    Root(u32, u32),
+}
+
 enum Expr {
     Pow(Box<Expr>, Box<Expr>),
-    Literal(u32),
+    Literal(Num),
 }
 fn pow(a: Expr, b: Expr) -> Expr {
     Expr::Pow(Box::new(a), Box::new(b))
 }
-fn int(n: u32) -> Expr {
+fn int(n: Num) -> Expr {
     Expr::Literal(n)
 }
 
 pub enum ExprFrame<A> {
     Pow(A, A),
-    Literal(u32),
+    Literal(Num),
 }
 
 impl MappableFrame for ExprFrame<PartiallyApplied> {
@@ -34,17 +40,18 @@ impl<'a> Collapsible for &'a Expr {
         }
     }
 }
-fn eval(e: &Expr) -> u32 {
-    e.collapse_frames(|frame: ExprFrame<u32>| match frame {
-        ExprFrame::Pow(a, b) => a.pow(b),
+fn eval(e: &Expr) -> Num {
+    use Num::*;
+    e.collapse_frames(|frame: ExprFrame<Num>| match frame {
+        ExprFrame::Pow(a, b) => match (a, b) {
+            (_, _) => Int(1),
+        },
         ExprFrame::Literal(x) => x,
     })
 }
 
 fn main() {
-    let expr = pow(int(2), int(2));
-    assert_eq!(eval(&expr), 4);
+    use Num::*;
+    let expr = pow(int(Int(2)), int(Int(2)));
+    assert_eq!(eval(&expr), Int(1));
 }
-/*
-
-*/
