@@ -21,16 +21,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a26ae43d7bcc3b814de94796a5e736d4029efb0ee900c12e2d54c993ad1a1e07"
 
 [[package]]
-name = "fdsfds"
-version = "0.1.0"
-dependencies = [
- "itertools 0.12.0",
- "num-rational",
- "prime_factorization",
- "recursion",
-]
-
-[[package]]
 name = "getrandom"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -159,6 +149,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "qpow"
+version = "0.1.0"
+dependencies = [
+ "itertools 0.12.0",
+ "num-rational",
+ "prime_factorization",
+ "recursion",
+]
+
+[[package]]
 name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -191,6 +191,8 @@ dependencies = [
 [[package]]
 name = "recursion"
 version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f53e857b2b1b92a9265c645b3d5aa76d8435f81d06af5ca08f9027b1225351c2"
 
 [[package]]
 name = "wasi"
