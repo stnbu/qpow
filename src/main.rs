@@ -1,13 +1,34 @@
 #![feature(int_roundings)]
 use itertools::Itertools;
-use num_rational::Ratio;
+use num_rational::{Ratio, Rational};
 use prime_factorization::Factorization;
 use recursion::*;
+use std::fmt;
 
 #[derive(Eq, PartialEq, Debug, Copy, Clone)]
 enum Num {
     Rational(Ratio<u32>),
     Root(Ratio<u32>, u32),
+}
+
+impl fmt::Display for Num {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        //
+        match self {
+            Self::Root(m, n) => {
+                write!(f, "{m}^(1/{n})")
+            }
+            Self::Rational(ratio) => {
+                let numer = ratio.numer();
+                let denom = ratio.denom();
+                if *denom == 1 {
+                    write!(f, "{numer}")
+                } else {
+                    write!(f, "{numer}/{denom}")
+                }
+            }
+        }
+    }
 }
 
 enum Expr {
@@ -45,21 +66,27 @@ impl<'a> Collapsible for &'a Expr {
     }
 }
 
-pub fn root(base: u32, root: u32) -> Vec<Num> {
+pub fn root_factors(base: u32, root: u32) -> Vec<Num> {
     use Num::*;
-    let factorization = Factorization::run(base).factors;
+    let base_factorization = Factorization::run(base).factors;
+    let root_factorization = Factorization::run(root).factors;
     let mut result = vec![];
-    for factor in factorization.iter().sorted().unique() {
-        let count = factorization.iter().filter(|&n| n == factor).count() as u32;
-        let remainder = count % root;
-        let quotient = count.div_floor(root);
-        if quotient != 0 {
-            let n = Rational(Ratio::new(quotient * factor, 1));
-            result.push(n);
-        }
-        if remainder != 0 {
-            let n = Root(Ratio::new(remainder * factor, 1), root);
-            result.push(n);
+    for root_factor in root_factorization.iter() {
+        for base_factor in base_factorization.iter().sorted().unique() {
+            let count = base_factorization
+                .iter()
+                .filter(|&n| n == base_factor)
+                .count() as u32;
+            let remainder = count % root_factor;
+            let quotient = count.div_floor(*root_factor);
+            if quotient != 0 {
+                let n = Rational(Ratio::new(quotient * base_factor, 1));
+                result.push(n);
+            }
+            if remainder != 0 {
+                let n = Root(Ratio::new(remainder * base_factor, 1), *root_factor);
+                result.push(n);
+            }
         }
     }
     result
@@ -86,16 +113,9 @@ fn eval(e: &Expr) -> Num {
 }
 
 fn main() {
-    for (n, m) in &[(2, 6)] {
-        let r = root(*n, *m);
-        dbg!(r);
+    for (m, n) in &[(12, 3), (12, 2), (12, 6), (2, 12), (1441440, 1441440)] {
+        let r = root_factors(*m, *n);
+        let s = r.iter().map(|t| format!("{t}")).join(" * ");
+        println!("{m}^(1/{n}) = {s}");
     }
-    /*     use Num::*;
-       let two = Ratio::new(2, 1);
-       let four = Ratio::new(4, 1);
-       let expr = pow(literal(Rational(two)), literal(Rational(two)));
-       assert_eq!(eval(&expr), Rational(four));
-       let expr = pow(literal(Root(two, 2)), literal(Rational(two)));
-       assert_eq!(eval(&expr), Rational(two));
-    */
 }
