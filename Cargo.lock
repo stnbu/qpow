@@ -65,7 +65,7 @@ dependencies = [
  "num-complex",
  "num-integer",
  "num-iter",
- "num-rational",
+ "num-rational 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits",
 ]
 
@@ -104,6 +104,15 @@ name = "num-iter"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d03e6c028c5dc5cac6e2dec0efda81fc887605bb3d884578bb6d6bf7514e252"
+dependencies = [
+ "autocfg",
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-rational"
+version = "0.4.1"
 dependencies = [
  "autocfg",
  "num-integer",
@@ -153,7 +162,7 @@ name = "qpow"
 version = "0.1.0"
 dependencies = [
  "itertools 0.12.0",
- "num-rational",
+ "num-rational 0.4.1",
  "prime_factorization",
  "recursion",
 ]
@@ -191,8 +200,6 @@ dependencies = [
 [[package]]
 name = "recursion"
 version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f53e857b2b1b92a9265c645b3d5aa76d8435f81d06af5ca08f9027b1225351c2"
 
 [[package]]
 name = "wasi"

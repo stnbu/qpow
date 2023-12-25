@@ -11,26 +11,6 @@ enum Num {
     Root(Ratio<u32>, u32),
 }
 
-impl fmt::Display for Num {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        //
-        match self {
-            Self::Root(m, n) => {
-                write!(f, "{m}^(1/{n})")
-            }
-            Self::Rational(ratio) => {
-                let numer = ratio.numer();
-                let denom = ratio.denom();
-                if *denom == 1 {
-                    write!(f, "{numer}")
-                } else {
-                    write!(f, "{numer}/{denom}")
-                }
-            }
-        }
-    }
-}
-
 enum Expr {
     Pow(Box<Expr>, Box<Expr>),
     Literal(Num),
@@ -115,7 +95,6 @@ fn eval(e: &Expr) -> Num {
 fn main() {
     for (m, n) in &[(12, 3), (12, 2), (12, 6), (2, 12), (1441440, 1441440)] {
         let r = root_factors(*m, *n);
-        let s = r.iter().map(|t| format!("{t}")).join(" * ");
-        println!("{m}^(1/{n}) = {s}");
+        println!("{r:?}");
     }
 }
