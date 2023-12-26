@@ -1,6 +1,6 @@
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum TResult {
     Int(i64),
+    IR(Box<Expr>),
 }
 
 macro_rules! impl_arith {
@@ -11,6 +11,8 @@ macro_rules! impl_arith {
             fn $func(self, other: TResult) -> TResult {
                 match (self, other) {
                     (TResult::Int(a), TResult::Int(b)) => TResult::Int(a.$func(b)),
+                    (_, TResult::IR(_)) => todo!(),
+                    (TResult::IR(_), _) => todo!(),
                 }
             }
         }
@@ -65,17 +67,27 @@ impl<'a> Collapsible for &'a Expr {
             Expr::Add(a, b) => ExprFrame::Add(a, b),
             Expr::Sub(a, b) => ExprFrame::Sub(a, b),
             Expr::Mul(a, b) => ExprFrame::Mul(a, b),
-            Expr::LiteralInt(x) => ExprFrame::LiteralInt(*x),
+            Expr::LiteralInt(x) => ExprFrame::LiteralInt(x),
         }
     }
 }
 fn eval(e: &Expr) -> TResult {
-    use TResult::Int;
+    use TResult::*;
     e.collapse_frames(|frame| match frame {
         ExprFrame::Add(Int(a), Int(b)) => TResult::Int(a + b),
         ExprFrame::Sub(Int(a), Int(b)) => TResult::Int(a - b),
         ExprFrame::Mul(Int(a), Int(b)) => TResult::Int(a * b),
         ExprFrame::LiteralInt(Int(x)) => TResult::Int(x),
+
+        ExprFrame::Add(IR(_), _) => todo!(),
+        ExprFrame::Sub(IR(_), _) => todo!(),
+        ExprFrame::Mul(IR(_), _) => todo!(),
+
+        ExprFrame::Add(_, IR(_)) => todo!(),
+        ExprFrame::Sub(_, IR(_)) => todo!(),
+        ExprFrame::Mul(_, IR(_)) => todo!(),
+
+        ExprFrame::LiteralInt(IR(_)) => todo!(),
     })
 }
 
@@ -83,11 +95,11 @@ fn main() {
     let _1 = TResult::Int(1);
     let _2 = TResult::Int(2);
     let _3 = TResult::Int(3);
+    let __1 = TResult::Int(1);
     let expr = add(
         multiply(subtract(literal(_1), literal(_2)), literal(_3)),
-        literal(_1),
+        literal(__1),
     );
-    assert_eq!(eval(&expr), TResult::Int(-2));
 }
 /*
 
