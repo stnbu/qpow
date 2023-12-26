@@ -8,5 +8,7 @@ edition = "2021"
 [dependencies]
 itertools = "0.12.0"
 num-rational = { path = "../num-rational" }
+num-integer = { path = "../num-integer" }
+num-traits = "0.2.17"
 prime_factorization = "1.0.4"
 recursion = { path = "../recursion" }
