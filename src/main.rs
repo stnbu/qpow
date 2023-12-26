@@ -1,8 +1,31 @@
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum TResult {
+    Int(i64),
+}
+
+macro_rules! impl_arith {
+    ($trait:ident, $func:ident) => {
+        impl std::ops::$trait<TResult> for TResult {
+            type Output = TResult;
+
+            fn $func(self, other: TResult) -> TResult {
+                match (self, other) {
+                    (TResult::Int(a), TResult::Int(b)) => TResult::Int(a.$func(b)),
+                }
+            }
+        }
+    };
+}
+
+impl_arith!(Add, add);
+impl_arith!(Sub, sub);
+impl_arith!(Mul, mul);
+
 enum Expr {
     Add(Box<Expr>, Box<Expr>),
     Sub(Box<Expr>, Box<Expr>),
     Mul(Box<Expr>, Box<Expr>),
-    LiteralInt(i64),
+    LiteralInt(TResult),
 }
 fn add(a: Expr, b: Expr) -> Expr {
     Expr::Add(Box::new(a), Box::new(b))
@@ -13,7 +36,7 @@ fn subtract(a: Expr, b: Expr) -> Expr {
 fn multiply(a: Expr, b: Expr) -> Expr {
     Expr::Mul(Box::new(a), Box::new(b))
 }
-fn literal(n: i64) -> Expr {
+fn literal(n: TResult) -> Expr {
     Expr::LiteralInt(n)
 }
 
@@ -21,7 +44,7 @@ pub enum ExprFrame<A> {
     Add(A, A),
     Sub(A, A),
     Mul(A, A),
-    LiteralInt(i64),
+    LiteralInt(TResult),
 }
 use recursion::*;
 impl MappableFrame for ExprFrame<PartiallyApplied> {
@@ -46,21 +69,25 @@ impl<'a> Collapsible for &'a Expr {
         }
     }
 }
-fn eval(e: &Expr) -> i64 {
+fn eval(e: &Expr) -> TResult {
+    use TResult::Int;
     e.collapse_frames(|frame| match frame {
-        ExprFrame::Add(a, b) => a + b,
-        ExprFrame::Sub(a, b) => a - b,
-        ExprFrame::Mul(a, b) => a * b,
-        ExprFrame::LiteralInt(x) => x,
+        ExprFrame::Add(Int(a), Int(b)) => TResult::Int(a + b),
+        ExprFrame::Sub(Int(a), Int(b)) => TResult::Int(a - b),
+        ExprFrame::Mul(Int(a), Int(b)) => TResult::Int(a * b),
+        ExprFrame::LiteralInt(Int(x)) => TResult::Int(x),
     })
 }
 
 fn main() {
+    let _1 = TResult::Int(1);
+    let _2 = TResult::Int(2);
+    let _3 = TResult::Int(3);
     let expr = add(
-        multiply(subtract(literal(1), literal(2)), literal(3)),
-        literal(1),
+        multiply(subtract(literal(_1), literal(_2)), literal(_3)),
+        literal(_1),
     );
-    assert_eq!(eval(&expr), -2);
+    assert_eq!(eval(&expr), TResult::Int(-2));
 }
 /*
 
