@@ -63,6 +63,11 @@ fn mul<'t>(a: &'t Expr<'t>, b: &'t Expr<'t>) -> Expr<'t> {
     use Expr::*;
     match (a, b) {
         (Int(x), Int(y)) => Int(x * y),
+        // _foil_?
+        (Op(_), Op(_)) => Op(Box::new(Operation::Mul(&a, &b))),
+        // distribute?
+        (_, Op(_)) | (Op(_), _) => Op(Box::new(Operation::Mul(&a, &b))),
+        // et cetera?
         _ => Op(Box::new(Operation::Mul(&a, &b))),
     }
 }
