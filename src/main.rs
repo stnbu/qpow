@@ -2,6 +2,7 @@ use std::fmt;
 
 enum Expr<'a> {
     Int(u32),
+    Root(u32, u32),
     Op(Box<Operation<'a>>),
 }
 
@@ -9,6 +10,7 @@ impl fmt::Display for Expr<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Int(i) => write!(f, "{i}"),
+            Self::Root(m, p) => write!(f, "{m}^(1/{p})"),
             Self::Op(op) => write!(f, "{op}"),
         }
     }
@@ -29,12 +31,19 @@ impl fmt::Display for Operation<'_> {
 }
 
 fn main() {
-    let x = Expr::Int(3);
-    let y = Expr::Int(4);
-    let z = add(&x, &y);
-    println!("{z}");
+    let three = Expr::Int(3);
+    let four = Expr::Int(4);
+    let _ = add(&three, &four);
+
+    let root2 = Expr::Root(2, 2);
+    let wat = add(&three, &root2);
+    println!("{wat}");
 }
 
 fn add<'t>(a: &'t Expr<'t>, b: &'t Expr<'t>) -> Expr<'t> {
-    Expr::Op(Box::new(Operation::Add(&a, &b)))
+    use Expr::*;
+    match (a, b) {
+        (Int(a), Int(b)) => Int(a + b),
+        (a, b) => Op(Box::new(Operation::Add(&a, &b))),
+    }
 }
