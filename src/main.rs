@@ -2,23 +2,23 @@ use std::fmt;
 
 enum Expr<'a> {
     Int(u32),
-    Operation(Box<Oper<'a>>),
+    Op(Box<Operation<'a>>),
 }
 
 impl fmt::Display for Expr<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Int(i) => write!(f, "{i}"),
-            Self::Operation(op) => write!(f, "{op}"),
+            Self::Op(op) => write!(f, "{op}"),
         }
     }
 }
 
-enum Oper<'a> {
+enum Operation<'a> {
     Add(&'a Expr<'a>, &'a Expr<'a>),
 }
 
-impl fmt::Display for Oper<'_> {
+impl fmt::Display for Operation<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Add(a, b) => {
@@ -36,5 +36,5 @@ fn main() {
 }
 
 fn add<'t>(a: &'t Expr<'t>, b: &'t Expr<'t>) -> Expr<'t> {
-    Expr::Operation(Box::new(Oper::Add(&a, &b)))
+    Expr::Op(Box::new(Operation::Add(&a, &b)))
 }
